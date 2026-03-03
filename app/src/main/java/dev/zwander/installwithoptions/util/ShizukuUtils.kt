@@ -1,60 +1,137 @@
-package dev.zwander.installwithoptions.util
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kaiser Xit - UI Demo</title>
+<style>
+body{
+    margin:0;
+    background:#111;
+    font-family:Arial, sans-serif;
+    color:white;
+    overflow:hidden;
+}
 
-import android.content.Context
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.currentStateAsState
-import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuProvider
-import rikka.sui.Sui
+.panel{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:700px;
+    background:#1a1a1a;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 0 30px black;
+}
 
-object ShizukuUtils {
-    private fun isInstalled(context: Context): Boolean {
-        return try {
-            @Suppress("SENSELESS_COMPARISON")
-            context.packageManager.getApplicationInfo(ShizukuProvider.MANAGER_APPLICATION_ID, 0) != null
-        } catch (_: Throwable) {
-            Sui.isSui()
-        }
-    }
+.title{
+    text-align:center;
+    font-size:28px;
+    margin-bottom:15px;
+}
 
-    private val isRunning: Boolean
-        get() = Shizuku.pingBinder()
+.section{
+    margin:15px 0;
+}
 
-    @Composable
-    fun rememberShizukuState(): State<ShizukuState> {
-        val context = LocalContext.current
-        val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
-        val shizukuState = remember {
-            mutableStateOf(ShizukuState.NOT_INSTALLED)
-        }
+button{
+    padding:8px 15px;
+    margin:5px;
+    border:none;
+    border-radius:8px;
+    background:#333;
+    color:white;
+    cursor:pointer;
+}
 
-        LaunchedEffect(key1 = lifecycleState) {
-            if (lifecycleState == Lifecycle.State.RESUMED) {
-                val installed = isInstalled(context)
-                val isRunning = isRunning
+button.active{
+    background:red;
+}
 
-                shizukuState.value = when {
-                    isRunning -> ShizukuState.RUNNING
-                    !installed -> ShizukuState.NOT_INSTALLED
-                    else -> ShizukuState.INSTALLED_NOT_RUNNING
-                }
-            }
-        }
+input[type=range]{
+    width:100%;
+}
 
-        return shizukuState
+#fovCircle{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    border:2px solid red;
+    border-radius:50%;
+    display:none;
+    pointer-events:none;
+}
+
+</style>
+</head>
+<body>
+
+<div class="panel">
+    <div class="title">Kaiser Xit (UI Demo)</div>
+
+    <div class="section">
+        <h3>Selecionar Parte</h3>
+        <button onclick="selectPart(this)">Cabeça</button>
+        <button onclick="selectPart(this)">Pescoço</button>
+        <button onclick="selectPart(this)">Peito</button>
+    </div>
+
+    <div class="section">
+        <h3>FOV</h3>
+        <button id="fovBtn" onclick="toggleFov()">FOV OFF</button>
+        <br><br>
+        FOV Size:
+        <input type="range" min="0" max="2000" value="200" id="fovSlider" oninput="updateFov()">
+    </div>
+
+    <div class="section">
+        <h3>ESP (Visual Demo)</h3>
+        <button onclick="toggleActive(this)">ESP Player</button>
+        <button onclick="toggleActive(this)">ESP Box</button>
+        <button onclick="toggleActive(this)">ESP Linha Cabeça</button>
+        <button onclick="toggleActive(this)">ESP Esqueleto</button>
+    </div>
+</div>
+
+<div id="fovCircle"></div>
+
+<script>
+let fovOn = false;
+let circle = document.getElementById("fovCircle");
+let slider = document.getElementById("fovSlider");
+let fovBtn = document.getElementById("fovBtn");
+
+function toggleFov(){
+    fovOn = !fovOn;
+
+    if(fovOn){
+        circle.style.display = "block";
+        fovBtn.innerText = "FOV ON";
+        fovBtn.classList.add("active");
+    } else {
+        circle.style.display = "none";
+        fovBtn.innerText = "FOV OFF";
+        fovBtn.classList.remove("active");
     }
 }
 
-enum class ShizukuState {
-    NOT_INSTALLED,
-    INSTALLED_NOT_RUNNING,
-    RUNNING,
+function updateFov(){
+    let size = slider.value;
+    circle.style.width = size + "px";
+    circle.style.height = size + "px";
 }
+
+function selectPart(btn){
+    let buttons = btn.parentElement.querySelectorAll("button");
+    buttons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+}
+
+function toggleActive(btn){
+    btn.classList.toggle("active");
+}
+</script>
+
+</body>
+</html>
